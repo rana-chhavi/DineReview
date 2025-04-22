@@ -25,7 +25,7 @@ public class Restaurant {
     private String id;
 
     @Field(type = FieldType.Text)
-    private String restaurantName;
+    private String name;
 
     @Field(type = FieldType.Text)
     private String cuisineType;
