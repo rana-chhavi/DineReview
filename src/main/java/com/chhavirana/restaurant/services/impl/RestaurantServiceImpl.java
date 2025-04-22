@@ -1,5 +1,6 @@
 package com.chhavirana.restaurant.services.impl;
 
+import com.chhavirana.restaurant.RestaurantApplication;
 import com.chhavirana.restaurant.domain.GeoLocation;
 import com.chhavirana.restaurant.domain.RestaurantCreateUpdateRequest;
 import com.chhavirana.restaurant.domain.entities.Address;
@@ -9,6 +10,8 @@ import com.chhavirana.restaurant.repositories.RestaurantRepository;
 import com.chhavirana.restaurant.services.GeoLocationService;
 import com.chhavirana.restaurant.services.RestaurantService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.elasticsearch.core.geo.GeoPoint;
 import org.springframework.stereotype.Service;
 
@@ -35,7 +38,7 @@ public class RestaurantServiceImpl implements RestaurantService {
                 .build()).toList();
 
         Restaurant restaurant = Restaurant.builder()
-                .restaurantName(request.getName())
+                .name(request.getName())
                 .cuisineType(request.getCuisineType())
                 .contactInformation(request.getContactInformation())
                 .address(request.getAddress())
@@ -46,6 +49,33 @@ public class RestaurantServiceImpl implements RestaurantService {
                 .build();
 
         return restaurantRepository.save(restaurant);
+
+    }
+
+    @Override
+    public Page<Restaurant> searchRestaurants(
+            String query,
+            Float minRating,
+            Float latitude,
+            Float longitude,
+            Float radius,
+            Pageable pageable) {
+
+        if(null != minRating && (null == query || query.isEmpty())) {
+            return restaurantRepository.findByAverageRatingGreaterThanEqual(minRating, pageable);
+        }
+
+        Float searchMinRating = null == minRating ? 0f : minRating;
+
+        if(null != query && !query.trim().isEmpty()) {
+            return restaurantRepository.findByQueryAndMinRating(query, searchMinRating, pageable);
+        }
+
+        if(null != latitude && null != longitude && null != radius) {
+            return restaurantRepository.findByLocationNear(latitude, longitude, radius, pageable);
+        }
+
+        return restaurantRepository.findAll(pageable);
 
     }
 }

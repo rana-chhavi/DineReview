@@ -21,7 +21,7 @@ import java.util.List;
 public class RestaurantDto {
     private String id;
 
-    private String restaurantName;
+    private String name;
 
     private String cuisineType;
 
