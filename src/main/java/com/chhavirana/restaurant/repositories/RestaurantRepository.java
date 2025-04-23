@@ -8,6 +8,8 @@ import org.springframework.stereotype.Repository;
 
 import com.chhavirana.restaurant.domain.entities.Restaurant;
 
+import java.util.Optional;
+
 @Repository
 public interface RestaurantRepository extends ElasticsearchRepository<Restaurant, String> {
 
