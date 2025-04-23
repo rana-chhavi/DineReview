@@ -40,10 +40,31 @@ public class RestaurantController {
             @RequestParam(required = false) Float radius,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "20") int size
-    ){
+    ) {
         Page<Restaurant> searchResults = restaurantService.searchRestaurants(
                 q, minRating, latitude, longitude, radius, PageRequest.of(page - 1, size)
         );
         return searchResults.map(restaurantMapper::toSummaryDto);
     }
+
+    @GetMapping(path = "/{id}")
+    public ResponseEntity<RestaurantDto> getRestaurantById(
+            @PathVariable("id") String id
+    ) {
+        return restaurantService.getRestaurant(id)
+                                .map(restaurantMapper::toRestaurantDto)
+                                .map(ResponseEntity::ok)
+                                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @PutMapping(path = "/{id}")
+    public ResponseEntity<RestaurantDto> updateRestaurantById(
+            @PathVariable("id") String id,
+            @Valid @RequestBody RestaurantCreateUpdateRequestDto request
+    ) {
+        RestaurantCreateUpdateRequest restaurantCreateUpdateRequest = restaurantMapper.toRestaurantCreateUpdateRequest(request);
+        Restaurant updateRestaurant = restaurantService.updateRestaurant(id, restaurantCreateUpdateRequest);
+        return ResponseEntity.ok(restaurantMapper.toRestaurantDto(updateRestaurant));
+    }
 }
+
