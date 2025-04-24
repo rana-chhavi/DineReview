@@ -66,5 +66,13 @@ public class RestaurantController {
         Restaurant updateRestaurant = restaurantService.updateRestaurant(id, restaurantCreateUpdateRequest);
         return ResponseEntity.ok(restaurantMapper.toRestaurantDto(updateRestaurant));
     }
+
+    @DeleteMapping(path = "/{id}")
+    public ResponseEntity<Void> deleteRestaurantById(
+            @PathVariable("id") String id
+    ) {
+        restaurantService.deleteRestaurant(id);
+        return ResponseEntity.noContent().build();
+    }
 }
 
