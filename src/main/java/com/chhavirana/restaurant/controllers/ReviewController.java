@@ -9,6 +9,10 @@ import com.chhavirana.restaurant.mappers.ReviewMapper;
 import com.chhavirana.restaurant.services.ReviewService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -37,5 +41,18 @@ public class ReviewController {
         ReviewCreateUpdateRequest request = reviewMapper.toReviewCreateUpdateRequest(reviewCreateUpdateRequestDto);
         Review review = reviewService.createReview(user, restaurantId, request);
         return ResponseEntity.ok(reviewMapper.toDto(review));
+    }
+
+    @GetMapping
+    public Page<ReviewDto> listReviews(
+            @PathVariable String restaurantId,
+            @PageableDefault(
+                    size = 20,
+                    page = 0,
+                    sort = "datePosted",
+                    direction = Sort.Direction.DESC) Pageable pageable) {
+
+        return reviewService.listReviews(restaurantId, pageable)
+                .map(reviewMapper::toDto);
     }
 }
