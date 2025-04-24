@@ -20,6 +20,7 @@ import java.util.List;
 public interface RestaurantMapper {
     RestaurantCreateUpdateRequest toRestaurantCreateUpdateRequest(RestaurantCreateUpdateRequestDto dto);
 
+    @Mapping(source = "reviews", target = "totalReviews", qualifiedByName = "populateTotalReviews")
     RestaurantDto toRestaurantDto(Restaurant restaurant);
 
     @Mapping(source = "reviews", target = "totalReviews", qualifiedByName = "populateTotalReviews")
