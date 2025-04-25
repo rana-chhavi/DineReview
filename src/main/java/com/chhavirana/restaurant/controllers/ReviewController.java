@@ -83,4 +83,13 @@ public class ReviewController {
         Review updatedReview = reviewService.updateReview(user, restaurantId, reviewId, reviewCreateUpdateRequest);
         return ResponseEntity.ok(reviewMapper.toDto(updatedReview));
     }
+
+    @DeleteMapping(path = "/{reviewId}")
+    public ResponseEntity<Void> deleteReview(
+            @PathVariable String reviewId,
+            @PathVariable String restaurantId
+    ) {
+        reviewService.deleteReview(restaurantId, reviewId);
+        return ResponseEntity.noContent().build();
+    }
 }

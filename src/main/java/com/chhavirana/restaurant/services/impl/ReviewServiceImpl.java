@@ -71,9 +71,7 @@ public class ReviewServiceImpl implements ReviewService {
 
     @Override
     public Page<Review> listReviews(String restaurantId, Pageable pageable) {
-        Restaurant restaurant = restaurantService.getRestaurant(restaurantId).orElseThrow(() ->
-                 new RestaurantNotFoundException("Restaurant not found for specified restaurantId")
-        );
+        Restaurant restaurant = getRestaurantOrThrow(restaurantId);
 
         List<Review> reviews = restaurant.getReviews();
         Sort sort = pageable.getSort();
@@ -106,9 +104,7 @@ public class ReviewServiceImpl implements ReviewService {
 
     @Override
     public Optional<Review> getReview(String restaurantId, String reviewId) {
-        Restaurant restaurant = restaurantService.getRestaurant(restaurantId).orElseThrow(() ->
-                new RestaurantNotFoundException("Restaurant not found for specified restaurantId")
-        );
+        Restaurant restaurant = getRestaurantOrThrow(restaurantId);
         return getReviewFromRestaurant(reviewId, restaurant);
     }
 
@@ -121,9 +117,7 @@ public class ReviewServiceImpl implements ReviewService {
 
     @Override
     public Review updateReview(User author, String restaurantId, String reviewId, ReviewCreateUpdateRequest review) {
-        Restaurant restaurant = restaurantService.getRestaurant(restaurantId).orElseThrow(() ->
-                new RestaurantNotFoundException("Restaurant not found for specified restaurantId")
-        );
+        Restaurant restaurant = getRestaurantOrThrow(restaurantId);
 
         String authorId = author.getId();
         Review existingReview = getReviewFromRestaurant(reviewId, restaurant)
@@ -157,6 +151,23 @@ public class ReviewServiceImpl implements ReviewService {
         restaurant.setReviews(updatedReviews);
         restaurantRepository.save(restaurant);
         return existingReview;
+    }
+
+    private Restaurant getRestaurantOrThrow(String restaurantId) {
+        return restaurantService.getRestaurant(restaurantId).orElseThrow(() ->
+                new RestaurantNotFoundException("Restaurant not found for specified restaurantId")
+        );
+    }
+
+    @Override
+    public void deleteReview(String restaurantId, String reviewId) {
+        Restaurant restaurant = getRestaurantOrThrow(restaurantId);
+        List<Review> filteredReviews = restaurant.getReviews().stream()
+                                      .filter(r -> !reviewId.equals(r.getId()))
+                                      .toList();
+        restaurant.setReviews(filteredReviews);
+        updateRestaurantAverageRating(restaurant);
+        restaurantRepository.save(restaurant);
     }
 
     private void updateRestaurantAverageRating(Restaurant restaurant) {
