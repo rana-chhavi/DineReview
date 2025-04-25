@@ -32,15 +32,19 @@ public class ReviewController {
             @Valid @RequestBody ReviewCreateUpdateRequestDto reviewCreateUpdateRequestDto,
             @AuthenticationPrincipal Jwt jwt
         ) {
-        User user = User.builder()
-                                  .id(jwt.getSubject())
-                                  .username(jwt.getClaimAsString("preferred_username"))
-                                  .givenName(jwt.getClaimAsString("given_name"))
-                                  .familyName(jwt.getClaimAsString("family_name"))
-                                  .build();
+        User user = jwtToUser(jwt);
         ReviewCreateUpdateRequest request = reviewMapper.toReviewCreateUpdateRequest(reviewCreateUpdateRequestDto);
         Review review = reviewService.createReview(user, restaurantId, request);
         return ResponseEntity.ok(reviewMapper.toDto(review));
+    }
+
+    private static User jwtToUser(Jwt jwt) {
+        return User.builder()
+                   .id(jwt.getSubject())
+                   .username(jwt.getClaimAsString("preferred_username"))
+                   .givenName(jwt.getClaimAsString("given_name"))
+                   .familyName(jwt.getClaimAsString("family_name"))
+                   .build();
     }
 
     @GetMapping
@@ -54,5 +58,29 @@ public class ReviewController {
 
         return reviewService.listReviews(restaurantId, pageable)
                 .map(reviewMapper::toDto);
+    }
+
+    @GetMapping(path= "/{reviewId}")
+    public ResponseEntity<ReviewDto> getReview(
+            @PathVariable String reviewId,
+            @PathVariable String restaurantId
+    ) {
+        return reviewService.getReview(restaurantId, reviewId)
+                .map(reviewMapper::toDto)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.noContent().build());
+    }
+
+    @PutMapping(path = "/{reviewId}")
+    public ResponseEntity<ReviewDto> updateReview(
+            @PathVariable String reviewId,
+            @PathVariable String restaurantId,
+            @Valid @RequestBody ReviewCreateUpdateRequestDto review,
+            @AuthenticationPrincipal Jwt jwt
+    ) {
+        ReviewCreateUpdateRequest reviewCreateUpdateRequest = reviewMapper.toReviewCreateUpdateRequest(review);
+        User user = jwtToUser(jwt);
+        Review updatedReview = reviewService.updateReview(user, restaurantId, reviewId, reviewCreateUpdateRequest);
+        return ResponseEntity.ok(reviewMapper.toDto(updatedReview));
     }
 }
