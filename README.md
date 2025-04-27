@@ -99,7 +99,7 @@ By building the Restaurant Review Platform:
 
 ## Getting Started
 
-To get started with the Book Social Network project, follow the setup instructions in the respective directories:
+To get started with the DineReview project, follow the setup instructions in the respective directories:
 
 - [Backend Setup Instructions](/)
 - [Frontend Setup Instructions](/)
